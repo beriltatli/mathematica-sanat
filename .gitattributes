@@ -1,0 +1,3 @@
+*.wl  linguist-language=Mathematica
+*.wls linguist-language=Mathematica
+*.pdf linguist-documentation
