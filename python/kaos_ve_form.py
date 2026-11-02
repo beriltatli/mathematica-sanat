@@ -207,13 +207,45 @@ def gyroid_frame(s, size=600, pp=40):
 
 
 # 6.2 Dönüşen Clifford çekicisi: art1 → art2 → art1, ease ile yumuşatılmış
+#
+# Parametreler değil NOKTALAR dönüştürülür. Parametreleri art1'den art2'ye kaydırmak kareleri karartır:
+# Clifford haritasının simetrileri (a,b,c,d) ≅ (a,b,−c,−d) ≅ (−a,−b,c,−d) a·b'nin işaretini korur;
+# art1'de a·b < 0, art2'de > 0, yani her parametre yolu a = 0 ya da b = 0 düzleminden geçer. Orada
+# koordinatlardan biri sabitlenir, çekici çöker. Düz yolda 60 karenin ~24'ü birkaç noktaya inip siyah kalıyordu.
+#
+# Bunun yerine iki çekicinin noktaları kendi çerçevelerine (−1…1) ölçeklenir, ağırlık merkezine uzaklığa göre
+# sıralanır ve sıra sırayla eşleşir: içteki nokta içteki noktaya, dıştaki dıştakine akar. Her kare bu iki
+# bulutun ağırlıklı ortalamasıdır; s = 0 karesi art1'in, s = 1/2 karesi art2'nin kendisidir.
 clifford_from = np.array([-1.4, 1.6, 1.0, 0.7])
 clifford_to = np.array([1.7, 1.7, 0.6, 1.2])
+
+_bulut_onbellek = {}
+
+
+def clifford_bulut(params, n):
+    """Çekicinin n noktası, (−1…1)² çerçevesine ölçeklenmiş, ağırlık merkezine uzaklığa göre sıralı."""
+    anahtar = (tuple(np.round(params, 12)), int(n))
+    if anahtar not in _bulut_onbellek:
+        a, b, c, d = map(float, params)
+        xs, ys = clifford_points(a, b, c, d, int(n))
+        p = np.column_stack([xs / (1 + abs(c)), ys / (1 + abs(d))])
+        r = np.linalg.norm(p - p.mean(0), axis=1)
+        _bulut_onbellek[anahtar] = p[np.argsort(r, kind="stable")]
+    return _bulut_onbellek[anahtar]
+
+
+def yogunluk_resmi(p, res, grad="Ateş", gamma=0.55):
+    """attractor_art'ın çizim yarısı: (−1…1)² çerçevesindeki noktaları sayıp renge çevirir."""
+    counts, _, _ = np.histogram2d(p[:, 0], p[:, 1], bins=res, range=[[-1, 1], [-1, 1]])
+    m = np.log1p(counts)
+    m = (m / m.max()) ** gamma
+    return gradients[grad](m.T[::-1])
 
 
 def clifford_frame(s, n=800_000, res=600, grad="Ateş"):
     w = ease(1 - abs(1 - 2 * s))
-    return attractor_art((1 - w) * clifford_from + w * clifford_to, n, res, grad)
+    p, q = clifford_bulut(clifford_from, n), clifford_bulut(clifford_to, n)
+    return yogunluk_resmi((1 - w) * p + w * q, res, grad)
 
 
 # 6.3 Dönen karmaşık düzlem: z yerine z e^{it}

@@ -105,6 +105,17 @@ art5 = ContourPlot3D[
 (*Kayd\:0131r\:0131c\:0131larla \[CCedilla]ekicinin d\[ODoubleDot]rt parametresini de\:011fi\:015ftir. S\[UDoubleDot]r\[UDoubleDot]klerken d\[UDoubleDot]\:015f\[UDoubleDot]k \[CCedilla]\[ODoubleDot]z\[UDoubleDot]n\[UDoubleDot]rl\[UDoubleDot]kte h\:0131zl\:0131 \[ODoubleDot]nizleme g\[ODoubleDot]r\[UDoubleDot]rs\[UDoubleDot]n, b\:0131rak\:0131nca tam kalitede \[CCedilla]izilir. "Rastgele" ke\:015ffetmek, "Kaydet" PNG olarak d\:0131\:015fa aktarmak i\[CCedilla]in.*)
 
 
+(* "Rastgele" d\[UDoubleDot]\:011fmesi i\[CCedilla]in: baz\:0131 parametreler (\[ODoubleDot]r. a ya da b s\:0131f\:0131ra yak\:0131nken) \[CCedilla]ekiciyi birka\[CCedilla] noktaya \[CCedilla]\[ODoubleDot]kertir
+   ve ekran siyah kal\:0131r. canliMi, 100 \[Times] 100 \:0131zgarada en az 300 h\[UDoubleDot]cre dolu mu diye bakar (kaotik \[CCedilla]ekiciler
+   binlercesini doldurur); canliParametre bu s\:0131nav\:0131 ge\[CCedilla]en bir set bulana kadar en \[CCedilla]ok 50 kez yeniden \[CCedilla]eker. *)
+canliMi[{a_, b_, c_, d_}] := Module[{pts = Drop[cliffordPoints[a, b, c, d, 21000], 1000]},
+   Count[Flatten@BinCounts[pts, {-1 - Abs[c], 1 + Abs[c], (2 + 2 Abs[c])/100},
+      {-1 - Abs[d], 1 + Abs[d], (2 + 2 Abs[d])/100}], _?Positive] > 300];
+canliParametre[] := Module[{p, k = 0},
+   While[k++ < 50, p = RandomReal[{-2.5, 2.5}, 4]; If[canliMi[p], Break[]]];
+   p];
+
+
 Manipulate[
  attractorArt[{a, b, c, d},
   ControlActive[150000, n], ControlActive[350, 800], grad, gamma],
@@ -118,7 +129,7 @@ Manipulate[
  {{gamma, 0.55, "parlakl\:0131k"}, 0.25, 1.2, Appearance -> "Labeled"},
  Delimiter,
  Row[{
-   Button["Rastgele", {a, b, c, d} = RandomReal[{-2.5, 2.5}, 4]],
+   Button["Rastgele", {a, b, c, d} = canliParametre[]],
    Spacer[10],
    Button["Kaydet (PNG)",
     Export[FileNameJoin[{$HomeDirectory, "clifford_" <> ToString[Round[AbsoluteTime[]]] <> ".png"}],
@@ -237,17 +248,38 @@ exportVideo["gyroid_nefes.mp4", gyroidHQ]
 
 
 (* ::Text:: *)
-(*attractorArt kullan\:0131larak art1'in parametrelerinden {-1.4, 1.6, 1.0, 0.7} art2'ninkilere {1.7, 1.7, 0.6, 1.2} yumu\:015fak\[CCedilla]a ge\[CCedilla]ilir, sonra geri d\[ODoubleDot]n\[UDoubleDot]l\[UDoubleDot]r. Ge\[CCedilla]i\:015f do\:011frusal de\:011fil: ease e\:011frisi u\[CCedilla]larda yava\:015flar, b\[ODoubleDot]ylece d\[ODoubleDot]ng\[UDoubleDot]n\[UDoubleDot]n d\[ODoubleDot]n\[UDoubleDot]\:015f noktalar\:0131nda sars\:0131nt\:0131 olmaz. c ve d de\:011fi\:015ftik\[CCedilla]e attractorArt'\:0131n \[CCedilla]izim alan\:0131 da biraz b\[UDoubleDot]y\[UDoubleDot]y\[UDoubleDot]p k\[UDoubleDot]\[CCedilla]\[UDoubleDot]l\[UDoubleDot]r; bu da hafif bir yak\:0131nla\:015fma etkisi verir.*)
+(*art1'den {-1.4, 1.6, 1.0, 0.7} art2'ye {1.7, 1.7, 0.6, 1.2} yumu\:015fak\[CCedilla]a ge\[CCedilla]ilir, sonra geri d\[ODoubleDot]n\[UDoubleDot]l\[UDoubleDot]r. Ge\[CCedilla]i\:015f do\:011frusal de\:011fil: ease e\:011frisi u\[CCedilla]larda yava\:015flar, b\[ODoubleDot]ylece d\[ODoubleDot]ng\[UDoubleDot]n\[UDoubleDot]n d\[ODoubleDot]n\[UDoubleDot]\:015f noktalar\:0131nda sars\:0131nt\:0131 olmaz.*)
+(*D\[ODoubleDot]n\[UDoubleDot]\:015ft\[UDoubleDot]r\[UDoubleDot]len parametreler de\:011fil NOKTALAR. Parametreleri do\:011frudan kayd\:0131rmak karelerin yakla\:015f\:0131k %40'\:0131n\:0131 karart\:0131yordu: Clifford haritas\:0131n\:0131n simetrileri (a, b, c, d) -> (a, b, -c, -d) -> (-a, -b, c, -d) a*b'nin i\:015faretini korur; art1'de a*b < 0, art2'de > 0. Bu y\[UDoubleDot]zden her parametre yolu a = 0 ya da b = 0 d\[UDoubleDot]zleminden ge\[CCedilla]er; orada koordinatlardan biri sabitlenir ve \[CCedilla]ekici birka\[CCedilla] noktaya \[CCedilla]\[ODoubleDot]ker.*)
+(*Bunun yerine iki \[CCedilla]ekicinin noktalar\:0131 kendi \[CCedilla]izim alanlar\:0131na (-1...1 karesine) \[ODoubleDot]l\[CCedilla]eklenir, a\:011f\:0131rl\:0131k merkezine uzakl\:0131\:011fa g\[ODoubleDot]re s\:0131ralan\:0131r ve s\:0131ra s\:0131rayla e\:015fle\:015fir: i\[CCedilla]teki nokta i\[CCedilla]teki noktaya, d\:0131\:015ftaki d\:0131\:015ftakine akar. Her kare iki bulutun a\:011f\:0131rl\:0131kl\:0131 ortalamas\:0131d\:0131r; s = 0 karesi art1'in, s = 1/2 karesi art2'nin kendisidir ve hi\[CCedilla]bir kare \[CCedilla]\[ODoubleDot]kmez.*)
 
 
 cliffordFrom = {-1.4, 1.6, 1.0, 0.7};
 cliffordTo = {1.7, 1.7, 0.6, 1.2};
 
-(* s, 0 ile 1 aras\:0131nda: ilk yar\:0131da gidi\:015f, ikinci yar\:0131da d\[ODoubleDot]n\[UDoubleDot]\:015f. 1 - Abs[1 - 2 s] \[UDoubleDot]\[CCedilla]gen dalgad\:0131r (0, 1, 0), ease onu yumu\:015fat\:0131r.
-   N, parametrelerin ger\[CCedilla]ek say\:0131 olmas\:0131n\:0131 sa\:011flar; derlenmi\:015f cliffordPoints tam say\:0131 ifadelerle yava\:015f \[CCedilla]al\:0131\:015f\:0131r. *)
+(* \[CapitalCCedilla]ekicinin n noktas\:0131: attractorArt'taki \[CCedilla]izim alan\:0131na g\[ODoubleDot]re (-1...1)^2 karesine \[ODoubleDot]l\[CCedilla]eklenir, a\:011f\:0131rl\:0131k merkezine
+   uzakl\:0131\:011fa g\[ODoubleDot]re s\:0131ralan\:0131r. Sonu\[CCedilla] haf\:0131zaya al\:0131n\:0131r: b\[UDoubleDot]t\[UDoubleDot]n kareler ayn\:0131 iki bulutu kullan\:0131r. *)
+cliffordBulut[{a_, b_, c_, d_}, n_Integer] := cliffordBulut[{a, b, c, d}, n] =
+  Module[{p, r},
+   p = Transpose[Transpose[cliffordPoints[a, b, c, d, n]]/{1. + Abs[c], 1. + Abs[d]}];
+   r = Sqrt[Total[(Transpose[p] - Mean[p])^2]];
+   p[[Ordering[r]]]
+   ];
+
+(* attractorArt'\:0131n \[CCedilla]izim yar\:0131s\:0131: (-1...1)^2 karesindeki noktalar\:0131 sayar, logaritmik \[ODoubleDot]l\[CCedilla]ekle renge \[CCedilla]evirir *)
+yogunlukResmi[p_, res_Integer, grad_String : "Ate\:015f", gamma_ : 0.55] :=
+  Module[{counts, m},
+   counts = BinCounts[p, {-1, 1, 2/res}, {-1, 1, 2/res}];
+   m = Log[1. + counts];
+   m = (m/Max[m])^gamma;
+   ArrayPlot[Reverse@Transpose@m,
+    ColorFunction -> gradients[grad], ColorFunctionScaling -> False,
+    Frame -> False, PlotRangePadding -> None, ImageSize -> 800, Background -> Black]
+   ];
+
+(* s, 0 ile 1 aras\:0131nda: ilk yar\:0131da gidi\:015f, ikinci yar\:0131da d\[ODoubleDot]n\[UDoubleDot]\:015f. 1 - Abs[1 - 2 s] \[UDoubleDot]\[CCedilla]gen dalgad\:0131r (0, 1, 0), ease onu yumu\:015fat\:0131r. *)
 cliffordFrame[s_, n_Integer : 800000, res_Integer : 600, grad_String : "Ate\:015f"] :=
   Module[{w = N@ease[1 - Abs[1 - 2 s]]},
-   attractorArt[(1 - w) cliffordFrom + w cliffordTo, n, res, grad]
+   yogunlukResmi[(1 - w) cliffordBulut[cliffordFrom, n] + w cliffordBulut[cliffordTo, n], res, grad]
    ];
 
 

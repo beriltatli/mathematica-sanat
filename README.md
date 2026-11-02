@@ -30,7 +30,9 @@ Bu repo, ekspresyonist akrilik resimlerden esinlenen bir üretken sanat çalış
 | 2. Karmaşık düzlem | (z⁵ − 1)/(z² + 0.3i) + sin(1/z) fonksiyonunun alan renklendirmesi | `ComplexPlot`, `art4` |
 | 3. Gyroid küre | sin x cos y + sin y cos z + sin z cos x = 0 yüzeyi, bir küreyle kırpılmış | `ContourPlot3D`, `art5` |
 | 4. Canlı stüdyo | Çekicinin a, b, c, d parametreleri, nokta sayısı, palet ve parlaklık için kaydırıcılar | `Manipulate` |
-| 6. Animasyonlar | Nefes alan gyroid, dönüşen Clifford çekicisi, dönen karmaşık düzlem; MP4 dışa aktarma | `gyroidFrame`, `cliffordFrame`, `complexFrame`, `exportVideo` |
+| 6. Animasyonlar | Nefes alan gyroid, dönüşen Clifford çekicisi, dönen karmaşık düzlem; MP4 dışa aktarma | `gyroidFrame`, `cliffordFrame` (`cliffordBulut`, `yogunlukResmi`), `complexFrame`, `exportVideo` |
+
+**Clifford dönüşümü neden parametreleri değil noktaları kaydırır?** İlk sürüm art1'in parametrelerini art2'ninkilere doğrusal olarak kaydırıyordu; 60 karenin ~24'ü siyah çıktı. Sebep matematikte: Clifford haritasının simetrileri (a, b, c, d) ≅ (a, b, −c, −d) ≅ (−a, −b, c, −d) a·b'nin işaretini korur. art1'de a·b < 0, art2'de > 0, yani iki çekiciyi bağlayan her parametre yolu a = 0 ya da b = 0 düzleminden geçer; orada koordinatlardan biri sabitlenir ve çekici birkaç noktaya çöker. Şimdi iki çekicinin noktaları kendi çizim alanlarına ölçeklenir, ağırlık merkezine uzaklığa göre sıralanıp eşleştirilir ve her kare iki bulutun ağırlıklı ortalaması olarak çizilir. Hiçbir kare çökmez; s = 0 karesi art1'in, s = 1/2 karesi art2'nin kendisidir. Aynı sebeple stüdyodaki "Rastgele" düğmesi de artık çökmüş bir parametre seti gelirse yeniden çeker.
 
 ## Altın oran matematiği
 
@@ -269,6 +271,8 @@ python3 -m venv .venv
 .venv/bin/pip install -r python/requirements.txt
 .venv/bin/python python/calistir.py         # calistir.wls karşılığı → ciktilar/
 .venv/bin/python python/calistir_kaos.py    # calistir_kaos.wls karşılığı → ciktilar/kaos/
+.venv/bin/python python/studyo.py           # ortak stüdyo (Bölüm 12): üç mod, kaydırıcılı pencere
+.venv/bin/python python/studyo_kaos.py      # Clifford canlı stüdyosu (kaos_ve_form.wl Bölüm 4)
 ```
 
 | Dosya | Karşılığı | Not |
@@ -276,8 +280,10 @@ python3 -m venv .venv
 | `python/tuval.py` | `Graphics` + `Rasterize` | İlkeller sırayla kaydedilir, matplotlib (Agg) ile rasterleştirilir; kalınlıklar tuval genişliğine oranlı |
 | `python/ruh_katmanlari.py` | `ruh_katmanlari.wl` | Üç mod, `finish`, `smear`; `traceStrokes` numpy ile bütün darbeleri aynı anda izler |
 | `python/kaos_ve_form.py` | `kaos_ve_form.wl` | Clifford yinelemesi numba ile derlenir; gyroid pyvista (VTK) ile çizilir |
+| `python/studyo.py` | Bölüm 12 `Manipulate` | Aynı kontroller; kaydırıcı bırakılınca çizer, "Kaydet" 3000 px PNG'yi Masaüstüne yazar |
+| `python/studyo_kaos.py` | Bölüm 4 `Manipulate` | Sürüklerken 150 000 noktalık önizleme, bırakınca tam kalite; "Kaydet" ev klasörüne yazar |
 
-Farklar: rastgele sayı üreteci farklı olduğu için aynı tohum Mathematica'daki resmin aynısını vermez (kurallar aynıdır). `ComplexPlot`'un `"CyclicLogAbsArg"` renklendirmesi ve `"SunsetColors"` yaklaşık olarak yeniden kuruldu. Gyroid tek ana ışıkla aydınlatılır. `Manipulate` stüdyoları henüz taşınmadı.
+Farklar: rastgele sayı üreteci farklı olduğu için aynı tohum Mathematica'daki resmin aynısını vermez (kurallar aynıdır). `ComplexPlot`'un `"CyclicLogAbsArg"` renklendirmesi ve `"SunsetColors"` yaklaşık olarak yeniden kuruldu. Gyroid tek ana ışıkla aydınlatılır.
 
 ## Dosya yapısı
 
