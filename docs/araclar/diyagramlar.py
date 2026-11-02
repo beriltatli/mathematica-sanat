@@ -104,10 +104,10 @@ def golden_construction(n=14):
 def altin_spiral():
     kareler, spiral, kutup = golden_construction(14)
     W, H = 760, 660
-    p = svg_bas(W, H, "Altın dikdörtgen, altın spiral ve kutup")
-    p.append(yazi(30, 40, "Altın dikdörtgen → altın spiral → kutup", 20, kalin=True))
-    p.append(yazi(30, 63, "goldenConstruction[14]: 1 × φ tuvalden sırayla üst, sağ, alt, sol kare kesilir; "
-                          "kare kenarları φ⁻ᵏ.", 13, SONUK))
+    p = svg_bas(W, H, "Golden rectangle, golden spiral and pole")
+    p.append(yazi(30, 40, "Golden rectangle → golden spiral → pole", 20, kalin=True))
+    p.append(yazi(30, 63, "goldenConstruction[14]: squares are cut from the 1 × φ canvas in turn (top, right, bottom, left); "
+                          "side k is φ⁻ᵏ.", 13, SONUK))
 
     def panel(ox, oy, olcek, ayna, etiketle):
         def T(pt):
@@ -118,7 +118,7 @@ def altin_spiral():
 
         out = [f'<rect x="{ox}" y="{oy}" width="{olcek:.1f}" height="{PHI * olcek:.1f}" '
                f'fill="#161a2e" stroke="{SONUK}" stroke-width="1.2"/>']
-        yonler = ["üst", "sağ", "alt", "sol"]
+        yonler = ["top", "right", "bottom", "left"]
         for k, (x, y, s) in enumerate(kareler):
             (x1, y1), (x2, y2) = T((x, y)), T((x + s, y + s))
             out.append(f'<rect x="{min(x1, x2):.2f}" y="{min(y1, y2):.2f}" width="{abs(x2 - x1):.2f}" '
@@ -145,14 +145,14 @@ def altin_spiral():
     # etiket kutbun sağ altına, kısa bir çizgiyle: küçük karelerin üstüne binmesin
     p.append(f'<line x1="{kx + 4:.2f}" y1="{ky + 4:.2f}" x2="{kx + 44:.2f}" y2="{ky + 34:.2f}" '
              f'stroke="{KUTUP}" stroke-width="1.2"/>')
-    p.append(yazi(kx + 48, ky + 40, "kutup", 13, KUTUP, kalin=True))
-    p.append(yazi(ox, oy + PHI * olcek + 26, "Ruh Katmanları: kutup ≈ (0.276, 0.447) → ışık patlaması burada",
+    p.append(yazi(kx + 48, ky + 40, "pole", 13, KUTUP, kalin=True))
+    p.append(yazi(ox, oy + PHI * olcek + 26, "Soul Layers: pole ≈ (0.276, 0.447) → the light burst goes here",
                   12.5, SONUK))
 
     # sağ panel: aynalanmış yapı, kutup %72 yükseklikte
     ox2, oy2, olcek2 = 470, 175, 200
-    p.append(yazi(ox2, 130, "Işık Kafesi ve Eriyen Maskeler", 15, kalin=True))
-    p.append(yazi(ox2, 150, "y → φ − y  (tohuma göre x → 1 − x de)", 12.5, SONUK))
+    p.append(yazi(ox2, 130, "Light Cage and Melting Masks", 15, kalin=True))
+    p.append(yazi(ox2, 150, "y → φ − y  (and x → 1 − x for some seeds)", 12.5, SONUK))
     parca, (kx2, ky2) = panel(ox2, oy2, olcek2, True, False)
     p += parca
     alt = oy2 + PHI * olcek2
@@ -163,10 +163,10 @@ def altin_spiral():
     p.append(f'<path d="M{ax - 5},{ky2 + 10:.2f} L{ax},{ky2 + 2:.2f} L{ax + 5},{ky2 + 10:.2f}" fill="none" '
              f'stroke="{YAZI}" stroke-width="1.2"/>')
     oran = (PHI - kutup[1]) / PHI
-    p.append(yazi(ax + 8, (alt + ky2) / 2 - 6, f"%{oran * 100:.1f}", 15, KUTUP, kalin=True))
-    p.append(yazi(ax + 8, (alt + ky2) / 2 + 12, "yükseklik", 12, SONUK))
-    p.append(yazi(ox2, alt + 26, "kutup göğüs hizasına çıkar;", 12.5, SONUK))
-    p.append(yazi(ox2, alt + 44, "maskelerin aşağı akacak yeri olur", 12.5, SONUK))
+    p.append(yazi(ax + 8, (alt + ky2) / 2 - 6, f"{oran * 100:.1f}%", 15, KUTUP, kalin=True))
+    p.append(yazi(ax + 8, (alt + ky2) / 2 + 12, "of height", 12, SONUK))
+    p.append(yazi(ox2, alt + 26, "the pole rises to chest level,", 12.5, SONUK))
+    p.append(yazi(ox2, alt + 44, "leaving room for masks to drip down", 12.5, SONUK))
     kaydet("altin_spiral.svg", p)
 
 
@@ -175,9 +175,9 @@ def altin_spiral():
 def fillotaksis(paletler):
     W, H = 760, 475
     pal = paletler["Kozmik"]
-    p = svg_bas(W, H, "Fillotaksis: altın açıyla dizilmiş noktalar")
-    p.append(yazi(30, 40, "Fillotaksis: ayçiçeği gibi dizilim", 20, kalin=True))
-    p.append(yazi(30, 63, "rₙ = R·√(n/N),  θₙ = n·θg   (N = 400; ruhKatmanlari'ndaki phyllo katmanı 520 ve 300 nokta)",
+    p = svg_bas(W, H, "Phyllotaxis: dots placed by the golden angle")
+    p.append(yazi(30, 40, "Phyllotaxis: the sunflower pattern", 20, kalin=True))
+    p.append(yazi(30, 63, "rₙ = R·√(n/N),  θₙ = n·θg   (N = 400 here; the phyllo layer in ruhKatmanlari uses 520 and 300)",
                   13, SONUK))
 
     cx, cy, R = 215, 255, 165
@@ -213,10 +213,10 @@ def fillotaksis(paletler):
     satirlar = [
         (f"θg = 360°/φ² ≈ {th_g:.2f}°", ALTIN, True),
         (f"360° − θg = 360°/φ ≈ {360 - th_g:.2f}°", YAZI, False),
-        (f"büyük yay / küçük yay = φ ≈ {PHI:.3f}", YAZI, False),
-        ("Her yeni nokta bir öncekinden θg kadar döner:", SONUK, False),
-        ("açı hiçbir kesirle tekrarlanmadığı için", SONUK, False),
-        ("noktalar boşluk bırakmadan yayılır.", SONUK, False),
+        (f"large arc / small arc = φ ≈ {PHI:.3f}", YAZI, False),
+        ("Each new dot turns θg past the previous one.", SONUK, False),
+        ("The angle never lines up with a simple fraction,", SONUK, False),
+        ("so the dots spread out with no gaps.", SONUK, False),
     ]
     for j, (s, renk, kalin) in enumerate(satirlar):
         p.append(yazi(tx, 345 + 19 * j, s, 13.5 if j < 3 else 12.5, renk, kalin=kalin))
@@ -230,10 +230,10 @@ def paletler_svg(paletler):
     sol, sag = 30, 30
     satir = 128
     H = 80 + satir * len(paletler)
-    p = svg_bas(W, H, "Paletler")
-    p.append(yazi(sol, 40, "Paletler", 20, kalin=True))
-    p.append(yazi(sol, 63, "ruh_katmanlari.wl → palettes. Renkler koyudan açığa dizilir; "
-                           "palColor[pal, t] aralarında geçiş yapar (alttaki şerit).", 13, SONUK))
+    p = svg_bas(W, H, "Palettes")
+    p.append(yazi(sol, 40, "Palettes", 20, kalin=True))
+    p.append(yazi(sol, 63, "ruh_katmanlari.wl → palettes. Colours run dark to light; "
+                           "palColor[pal, t] blends between them (strip below).", 13, SONUK))
     p.append("<defs>")
     for ad, renkler in paletler.items():
         n = len(renkler)
@@ -244,7 +244,7 @@ def paletler_svg(paletler):
     for ad, renkler in paletler.items():
         n = len(renkler)
         p.append(yazi(sol, y + 14, ad, 15, kalin=True))
-        p.append(yazi(W - sag, y + 14, f"{n} renk", 12, SONUK, "end"))
+        p.append(yazi(W - sag, y + 14, f"{n} colours", 12, SONUK, "end"))
         gw = (W - sol - sag) / n
         for i, r in enumerate(renkler):
             x = sol + i * gw

@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Soul Layers Paints</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* one visual world: a dark gallery wall, gold for anything that comes from φ, coral for the pole */
+  --bg: #0e1018;
+  --surface: #161a26;
+  --line: #2a3045;
+  --ink: #ece8df;
+  --muted: #a3a8ba;
+  --gold: #e3b04b;
+  --pole: #ff6b5e;
+  --display: "Fraunces", Georgia, "Times New Roman", serif;
+  --body: "IBM Plex Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  /* layout: one 680px reading column; figures widen to 1040px */
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 17px/1.65 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--gold); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+img { max-width: 100%; height: auto; display: block; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.3rem, 6vw, 3.6rem); letter-spacing: -0.01em; }
+h2 { font-size: clamp(1.6rem, 3.6vw, 2.2rem); }
+h3 { font-size: 1.25rem; }
+p { margin: 0; }
+code, .mono { font-family: var(--mono); font-size: 0.88em; }
+code { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 0.05em 0.35em; }
+.wrap { width: min(1040px, 100% - 32px); margin-inline: auto; }
+.col { width: min(680px, 100%); margin-inline: auto; display: grid; gap: 1.1em; }
+section { padding-block: 64px; border-top: 1px solid var(--line); display: grid; gap: 28px; }
+.eyebrow { font: 500 0.78rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+.lede { font-size: 1.2rem; color: var(--ink); }
+.muted { color: var(--muted); }
+.note { border-left: 3px solid var(--gold); padding: 0.4em 0 0.4em 1em; color: var(--muted); font-size: 0.95rem; }
+.formula { font-family: var(--mono); font-size: 1rem; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 0.8em 1em; overflow-x: auto; white-space: pre; color: var(--ink); }
+.formula b { color: var(--gold); font-weight: 500; }
+
+header { padding-block: 56px 40px; display: grid; gap: 28px; }
+.hero { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.hero figure { margin: 0; }
+.hero img { border-radius: 6px; aspect-ratio: 1 / 1.618; object-fit: cover; width: 100%; }
+.hero figcaption { font-size: 0.82rem; color: var(--muted); margin-top: 6px; }
+
+.toc { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 0.92rem; }
+.toc a { color: var(--muted); text-decoration: none; }
+.toc a:hover { color: var(--gold); }
+
+figure { margin: 0; }
+figcaption { font-size: 0.9rem; color: var(--muted); margin-top: 10px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.split.wide-left { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+.diagram { overflow-x: auto; }
+.diagram svg { width: 100%; height: auto; display: block; min-width: 560px; color: var(--ink); }
+
+.controls { display: grid; gap: 12px; }
+.ctl { display: grid; grid-template-columns: 7.5em 1fr 4.2em; align-items: center; gap: 10px; font-size: 0.92rem; }
+.ctl label { color: var(--muted); }
+.ctl output { font-family: var(--mono); font-size: 0.85rem; text-align: right; font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--gold); }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+button {
+  font: 500 0.88rem var(--body); color: var(--ink); background: transparent;
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer;
+}
+button:hover { border-color: var(--gold); color: var(--gold); }
+button[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #1a1407; }
+canvas { display: block; width: 100%; height: auto; border-radius: 8px; background: #000; }
+.readout { font-family: var(--mono); font-size: 0.85rem; color: var(--muted); min-height: 1.4em; }
+.readout b { color: var(--ink); font-weight: 500; }
+.readout .bad { color: var(--pole); }
+
+.modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.mode { display: grid; gap: 12px; align-content: start; }
+.mode .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mode img { border-radius: 6px; width: 100%; }
+.mode h3 { margin-top: 4px; }
+.mode p { font-size: 0.95rem; color: var(--muted); }
+.mode .phi { font-size: 0.9rem; color: var(--ink); }
+.mode .phi b { color: var(--gold); font-weight: 500; }
+
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.grid3 img { border-radius: 6px; }
+.tile { display: grid; gap: 8px; align-content: start; }
+.tile p { font-size: 0.92rem; color: var(--muted); }
+
+ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 0.5em; }
+pre { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font: 0.86rem/1.6 var(--mono); }
+footer { border-top: 1px solid var(--line); padding-block: 36px 60px; color: var(--muted); font-size: 0.9rem; }
+
+@media (max-width: 820px) {
+  .split, .split.wide-left, .modes { grid-template-columns: 1fr; }
+  .grid3 { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 440px) {
+  .hero { grid-template-columns: 1fr 1fr; }
+  .hero figure:last-child { display: none; }
+  .grid3 { grid-template-columns: 1fr; }
+  .ctl { grid-template-columns: 6em 1fr 3.8em; }
+}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <div class="col">
+    <span class="eyebrow">Generative art · Wolfram Language + Python</span>
+    <h1>How Soul Layers paints</h1>
+    <p class="lede">These pictures are not drawn by hand. A short program throws down thousands of brush strokes, and one number, the golden ratio φ ≈ 1.618, decides where everything goes. This page walks through how it works, step by step. You don't need any maths or coding background.</p>
+  </div>
+  <div class="hero">
+    <figure><img src="gallery/soul_layers_kozmik_23.jpg" alt="Soul Layers, seed 23, Kozmik palette: swirling blue, magenta and orange strokes around a bright star burst" width="600" height="971"><figcaption>Soul Layers · seed 23</figcaption></figure>
+    <figure><img src="gallery/light_cage_7.jpg" alt="Light Cage, seed 7: a glowing blue ribcage and spine with a light burst at chest level" width="600" height="971"><figcaption>Light Cage · seed 7</figcaption></figure>
+    <figure><img src="gallery/melting_masks_18.jpg" alt="Melting Masks, seed 18: green ghost masks dripping down a pastel lilac background" width="600" height="971"><figcaption>Melting Masks · seed 18</figcaption></figure>
+  </div>
+  <nav class="toc col" aria-label="Sections">
+    <a href="#big-picture">1 · The big picture</a>
+    <a href="#golden-ratio">2 · The golden ratio</a>
+    <a href="#golden-angle">3 · The golden angle</a>
+    <a href="#flow-field">4 · Brush strokes</a>
+    <a href="#modes">5 · Three modes</a>
+    <a href="#glow">6 · The glow</a>
+    <a href="#attractor">7 · Chaos: the Clifford attractor</a>
+    <a href="#morph">8 · Why the animation went dark</a>
+    <a href="#more-forms">9 · Complex plane and gyroid</a>
+    <a href="#run">10 · Run it yourself</a>
+  </nav>
+</header>
+
+<main class="wrap">
+
+<!-- 1 -->
+<section id="big-picture">
+  <div class="col">
+    <span class="eyebrow">1 · The big picture</span>
+    <h2>One number in, one painting out</h2>
+    <p>Every painting starts from a <strong>seed</strong>: a whole number like 11 or 23. The seed drives the random choices (where a stroke starts, how a mask wobbles), so the same seed always gives the same painting, and a new seed gives a new one.</p>
+    <p>From there the program follows the same five steps every time:</p>
+  </div>
+  <figure class="diagram">
+    <svg viewBox="0 0 1040 300" role="img" aria-label="Pipeline: seed, golden layout, flow field, ten layers painted bottom to top, glow and grain, PNG file">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+      </defs>
+      <g font-family="IBM Plex Sans, sans-serif" fill="currentColor">
+        <!-- boxes -->
+        <g stroke="currentColor" stroke-opacity="0.35" fill="none">
+          <rect x="10" y="110" width="120" height="70" rx="10"/>
+          <rect x="180" y="110" width="150" height="70" rx="10" stroke="#e3b04b" stroke-opacity="1"/>
+          <rect x="380" y="110" width="140" height="70" rx="10"/>
+          <rect x="570" y="20" width="180" height="260" rx="10"/>
+          <rect x="800" y="110" width="110" height="70" rx="10"/>
+          <rect x="950" y="110" width="80" height="70" rx="10"/>
+        </g>
+        <text x="70" y="141" text-anchor="middle" font-size="15" font-weight="600">seed</text>
+        <text x="70" y="161" text-anchor="middle" font-size="12" opacity="0.7">e.g. 23</text>
+        <text x="255" y="141" text-anchor="middle" font-size="15" font-weight="600" fill="#e3b04b">golden layout</text>
+        <text x="255" y="161" text-anchor="middle" font-size="12" opacity="0.7">squares, spiral, pole</text>
+        <text x="450" y="141" text-anchor="middle" font-size="15" font-weight="600">flow field</text>
+        <text x="450" y="161" text-anchor="middle" font-size="12" opacity="0.7">which way to paint</text>
+        <text x="660" y="44" text-anchor="middle" font-size="14" font-weight="600">layers, bottom → top</text>
+        <g font-size="11.5">
+          <rect x="590" y="56" width="140" height="18" rx="3" fill="#ffd84a" fill-opacity="0.85"/><text x="600" y="69" fill="#1a1407">10 stars</text>
+          <rect x="590" y="78" width="140" height="18" rx="3" fill="#ff6a3d" fill-opacity="0.8"/><text x="600" y="91" fill="#1a1407">9 light burst</text>
+          <rect x="590" y="100" width="140" height="18" rx="3" fill="#e3b04b" fill-opacity="0.55"/><text x="600" y="113">8 golden spiral</text>
+          <rect x="590" y="122" width="140" height="18" rx="3" fill="#e5207f" fill-opacity="0.55"/><text x="600" y="135">7 sunflower dots</text>
+          <rect x="590" y="144" width="140" height="18" rx="3" fill="#8a2be2" fill-opacity="0.55"/><text x="600" y="157">6 stains</text>
+          <rect x="590" y="166" width="140" height="18" rx="3" fill="#5aa2ff" fill-opacity="0.45"/><text x="600" y="179">5 glass spheres</text>
+          <rect x="590" y="188" width="140" height="18" rx="3" fill="#5aa2ff" fill-opacity="0.3"/><text x="600" y="201">4 ribbons</text>
+          <rect x="590" y="210" width="140" height="18" rx="3" fill="#2337c6" fill-opacity="0.55"/><text x="600" y="223">3 veins</text>
+          <rect x="590" y="232" width="140" height="18" rx="3" fill="#2337c6" fill-opacity="0.4"/><text x="600" y="245">2 wide strokes</text>
+          <rect x="590" y="254" width="140" height="18" rx="3" fill="#0b1150" stroke="currentColor" stroke-opacity="0.3"/><text x="600" y="267">1 background</text>
+        </g>
+        <text x="855" y="141" text-anchor="middle" font-size="15" font-weight="600">finish</text>
+        <text x="855" y="161" text-anchor="middle" font-size="12" opacity="0.7">glow + grain</text>
+        <text x="990" y="151" text-anchor="middle" font-size="15" font-weight="600">PNG</text>
+        <!-- arrows -->
+        <g stroke="currentColor" stroke-width="1.5" fill="none" marker-end="url(#arr)">
+          <line x1="132" y1="145" x2="176" y2="145"/>
+          <line x1="332" y1="145" x2="376" y2="145"/>
+          <line x1="522" y1="145" x2="566" y2="145"/>
+          <line x1="752" y1="145" x2="796" y2="145"/>
+          <line x1="912" y1="145" x2="946" y2="145"/>
+        </g>
+        <g font-size="11" opacity="0.75" text-anchor="middle">
+          <text x="154" y="134">drives</text><text x="154" y="146" dy="22">randomness</text>
+          <text x="354" y="134">places</text><text x="354" y="146" dy="22">vortices</text>
+          <text x="544" y="134">steers</text><text x="544" y="146" dy="22">every stroke</text>
+          <text x="774" y="134">700–3000</text><text x="774" y="146" dy="22">px image</text>
+        </g>
+      </g>
+    </svg>
+    <figcaption>The pipeline for the Soul Layers mode. Later layers are painted on top of earlier ones, so the order of the list is the depth in the picture. The other two modes use the same steps with different layers.</figcaption>
+  </figure>
+</section>
+
+<!-- 2 -->
+<section id="golden-ratio">
+  <div class="col">
+    <span class="eyebrow">2 · The golden ratio</span>
+    <h2>Cut off a square, and what's left has the same shape</h2>
+    <p>The golden ratio is <strong>φ = (1 + √5) / 2 ≈ 1.618</strong>. A rectangle whose long side is φ times its short side has a special property: cut a square off one end, and the leftover rectangle is a smaller copy of the original. Do it again, and again, and the squares spiral inward toward one point.</p>
+    <p>Every canvas here is such a rectangle, 1 wide and φ tall. The program cuts 14 squares (top, right, bottom, left, repeat), draws quarter-circles through them to get the <strong>golden spiral</strong>, and finds the point the squares shrink toward. We call it the <strong>pole</strong>. The pole is where the eye goes first, so that's where the light burst is painted.</p>
+  </div>
+  <div class="split wide-left">
+    <figure class="panel">
+      <svg id="gr-svg" viewBox="0 0 330 520" role="img" aria-label="A 1 by φ rectangle with squares cut off in turn and the golden spiral drawn through them"></svg>
+      <div class="controls">
+        <div class="ctl"><label for="gr-k">squares cut</label><input id="gr-k" type="range" min="0" max="12" step="1" value="5"><output id="gr-k-out" for="gr-k">5</output></div>
+        <div class="btns"><button type="button" id="gr-mirror" aria-pressed="false">Mirror (Light Cage, Melting Masks)</button></div>
+      </div>
+      <figcaption>Drag the slider to cut squares one by one. Each square's side is the previous one divided by φ: 1, 0.618, 0.382, 0.236 … The coral dot is the pole.</figcaption>
+    </figure>
+    <div class="col" style="width:100%">
+      <h3>Where else φ shows up in the code</h3>
+      <p class="muted">The pole is only the start. Most sizes and strengths in the painting are powers of φ, so they all share one rhythm:</p>
+      <ul style="margin:0; padding-left:1.2em; display:grid; gap:0.5em">
+        <li><strong>Vortex strengths</strong> are 1, 1/φ and 1/φ², so the swirl at the pole is the strongest and the others fade in golden steps.</li>
+        <li><strong>Glass spheres</strong> along the spiral each have a radius 1/φ times the one before.</li>
+        <li><strong>The spine</strong> in Light Cage shrinks by φ<sup>−1/8</sup> per vertebra, so every 8 vertebrae the size drops by exactly φ.</li>
+        <li><strong>Ribs</strong> get shorter by powers of φ from the middle outward.</li>
+        <li><strong>Mirroring</strong> flips the layout upside down (y → φ − y). The pole moves from 27.6% to 72.4% of the height: chest level for the ribcage, and room below for the masks to drip.</li>
+      </ul>
+      <div class="formula">pole ≈ (<b>0.276</b>, <b>0.447</b>)   on a 1 × φ canvas
+mirrored: 1 − 0.276 = <b>72.4%</b> of the height</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="golden-angle">
+  <div class="col">
+    <span class="eyebrow">3 · The golden angle</span>
+    <h2>Why sunflower seeds never line up</h2>
+    <p>The dotted patches in the paintings are placed the way a sunflower places its seeds. Dot number <em>n</em> sits a little further out than dot <em>n − 1</em>, and is turned by a fixed angle. If that angle is a simple fraction of a full turn (like 90° or 120°), the dots fall into straight spokes with gaps between them. The <strong>golden angle</strong>, 360°/φ² ≈ 137.5°, is the angle that is "least like a fraction", so the dots never line up and fill the disc evenly.</p>
+  </div>
+  <div class="split">
+    <figure class="panel">
+      <canvas id="sf" width="640" height="640" aria-label="Dots placed at a chosen turning angle; at 137.5 degrees they fill the disc evenly"></canvas>
+      <div class="controls">
+        <div class="ctl"><label for="sf-a">turn per dot</label><input id="sf-a" type="range" min="90" max="180" step="0.1" value="137.5"><output id="sf-a-out" for="sf-a">137.5°</output></div>
+        <div class="btns" id="sf-presets">
+          <button type="button" data-a="90">90°</button>
+          <button type="button" data-a="120">120°</button>
+          <button type="button" data-a="137.5077640500378" aria-pressed="true">137.5° golden</button>
+          <button type="button" data-a="140">140°</button>
+        </div>
+      </div>
+      <figcaption>Try 120°: three spokes. Try 140°: curved arms with gaps. Only the golden angle packs evenly. Move the slider by 0.1° and the gaps come back.</figcaption>
+    </figure>
+    <div class="col" style="width:100%">
+      <h3>The formula</h3>
+      <div class="formula">r<sub>n</sub> = R · √(n / N)      distance from the centre
+θ<sub>n</sub> = n · <b>137.5°</b>           angle</div>
+      <p class="muted">The square root keeps the density even: the disc's area grows with r², so r has to grow with √n. In Soul Layers there are two of these patches, with 520 and 300 dots. Their centres sit where the golden division lines cross, at (0.618, 0.786 φ) and (0.786, 0.236 φ).</p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="flow-field">
+  <div class="col">
+    <span class="eyebrow">4 · Brush strokes</span>
+    <h2>Every stroke follows an invisible current</h2>
+    <p>Imagine the canvas covered in tiny arrows, like wind on a weather map. That's a <strong>flow field</strong>. A brush stroke starts at a random point, takes a small step in the direction of the arrow under it, looks again, takes another step, and so on. Thousands of strokes following the same arrows give the painting its sense of movement.</p>
+    <p>The arrows come from two ingredients added together: smooth <strong>waves</strong> made of sines and cosines (the gentle currents), and three <strong>vortices</strong> on the golden spiral (the whirlpools). The strongest vortex sits on the pole.</p>
+  </div>
+  <div class="split wide-left">
+    <figure class="panel">
+      <canvas id="ff" width="600" height="971" aria-label="Brush strokes being traced along a flow field with three vortices on the golden spiral"></canvas>
+      <div class="controls">
+        <div class="ctl"><label for="ff-s">vortex strength</label><input id="ff-s" type="range" min="0" max="2.5" step="0.1" value="1"><output id="ff-s-out" for="ff-s">1.0</output></div>
+        <div class="btns">
+          <button type="button" id="ff-seed">New seed</button>
+          <button type="button" id="ff-arrows" aria-pressed="false">Show arrows</button>
+          <button type="button" id="ff-guide" aria-pressed="true">Show spiral</button>
+        </div>
+        <div class="readout" id="ff-read"></div>
+      </div>
+      <figcaption>A simplified, live version of <code>traceStrokes</code> using the real formula and the Kozmik palette. At strength 0 only the waves are left. The vortex positions are approximate.</figcaption>
+    </figure>
+    <div class="col" style="width:100%">
+      <h3>The recipe, in four lines</h3>
+      <p class="muted">1. Bend the coordinates with sine waves, so straight lines become wobbly:</p>
+      <div class="formula">x̃ = x + 0.22 sin(3.3 y + p₁)
+ỹ = y + 0.22 sin(2.9 x + p₂)</div>
+      <p class="muted">2. Mix three waves into one number <em>n</em> and turn it into a direction:</p>
+      <div class="formula">n = sin(4.1 x̃ + p₃) + cos(3.4 ỹ − p₁)
+    + 0.6 sin(8.5 (x̃ − 0.7 ỹ) + p₂)
+direction = (cos 1.4n, sin 1.4n)</div>
+      <p class="muted">3. Add a pull around each vortex that fades with distance. Strengths are <span style="color:var(--gold)">1, 1/φ, 1/φ²</span> and they spin +, −, +.</p>
+      <p class="muted">4. Step the brush a fixed small distance along the result. Repeat.</p>
+      <p class="muted">The phases p₁, p₂, p₃ come from the seed. That's why a new seed gives new currents but keeps the golden layout.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="modes">
+  <div class="col">
+    <span class="eyebrow">5 · Three modes</span>
+    <h2>Same skeleton, three different paintings</h2>
+    <p>All three modes share the golden layout, the flow field and the finishing step. They differ in what they paint on top. The second image in each pair is the same painting with the <strong>golden guide</strong> switched on, so you can see the squares, the spiral and the pole underneath.</p>
+  </div>
+  <div class="modes">
+    <article class="mode">
+      <div class="pair">
+        <img src="gallery/soul_layers_kozmik_23.jpg" alt="Soul Layers, seed 23" width="600" height="971" loading="lazy">
+        <img src="gallery/soul_layers_guide_23.jpg" alt="Soul Layers, seed 23, with the golden guide drawn over it" width="600" height="971" loading="lazy">
+      </div>
+      <h3>Soul Layers</h3>
+      <p>Flowing strokes, overlapping glass spheres, a light burst at the pole, sunflower dots and four-pointed stars. Default palette: Kozmik.</p>
+      <p class="phi"><b>φ:</b> burst at the pole · vortices 1, 1/φ, 1/φ² · sphere radii ÷ φ each step · stars sized by powers of φ</p>
+    </article>
+    <article class="mode">
+      <div class="pair">
+        <img src="gallery/light_cage_40.jpg" alt="Light Cage, seed 40" width="600" height="971" loading="lazy">
+        <img src="gallery/light_cage_guide_7.jpg" alt="Light Cage, seed 7, with the golden guide" width="600" height="971" loading="lazy">
+      </div>
+      <h3>Light Cage</h3>
+      <p>A cobalt ribcage and spine, a yellow-magenta neon halo, a gold-white burst in the chest, DNA-like helices and sharp stars. Default palette: NeonGece (neon night).</p>
+      <p class="phi"><b>φ:</b> mirrored layout, pole at 72.4% · vertebrae × φ<sup>−1/8</sup> · ribs shorten by powers of φ · rays at multiples of the golden angle</p>
+    </article>
+    <article class="mode">
+      <div class="pair">
+        <img src="gallery/melting_masks_5.jpg" alt="Melting Masks, seed 5" width="600" height="971" loading="lazy">
+        <img src="gallery/melting_masks_guide_5.jpg" alt="Melting Masks, seed 5, with the golden guide" width="600" height="971" loading="lazy">
+      </div>
+      <h3>Melting Masks</h3>
+      <p>A misty pastel ground with aubergine swirls at the edges, three to five green and turquoise ghost masks (one dark purple with a single blue eye), drips running down, and an oil-paint smear. Default palette: PastelRuh (pastel soul).</p>
+      <p class="phi"><b>φ:</b> biggest mask on the pole, others on the spiral, each radius ÷ φ · edge vortices at 0.382 / 0.618 of each side</p>
+    </article>
+  </div>
+  <div class="grid3">
+    <div class="tile"><img src="gallery/soul_layers_toprak_11.jpg" alt="Soul Layers, seed 11, Toprak palette in teal, mustard and terracotta" width="600" height="971" loading="lazy"><p>Soul Layers, seed 11, <strong>Toprak</strong> (earth) palette.</p></div>
+    <div class="tile"><img src="gallery/soul_layers_hayalet_4.jpg" alt="Soul Layers, seed 4, Hayalet palette in purple, pink and acid green" width="600" height="971" loading="lazy"><p>Soul Layers, seed 4, <strong>Hayalet</strong> (ghost) palette.</p></div>
+    <div class="tile"><img src="gallery/melting_masks_18.jpg" alt="Melting Masks, seed 18" width="600" height="971" loading="lazy"><p>Melting Masks, seed 18. Each mask outline is a circle with four random wobbles added, stretched downward.</p></div>
+  </div>
+  <p class="col note">Any palette works with any mode. These images were made with the project's Python port; the Mathematica version follows the same rules but uses a different random number generator, so the same seed won't give a pixel-identical picture.</p>
+</section>
+
+<!-- 6 -->
+<section id="glow">
+  <div class="split">
+    <div class="col" style="width:100%">
+      <span class="eyebrow">6 · The glow</span>
+      <h2>Bright parts leak light</h2>
+      <p>The last step makes the painting look lit from inside. The program makes a blurred copy of the image and combines it with the original using a <strong>screen</strong> blend, the same mode photo editors use for light leaks. Where the picture is already bright, the blur adds a halo; where it's dark, almost nothing changes. Then it adds a little film grain.</p>
+      <div class="formula">I = 1 − (1 − a)(1 − g·b)
+
+a = the image     b = its blurred copy
+g = glow amount   (0.3, Light Cage 0.4, Masks 0.2)</div>
+      <p class="muted">Melting Masks gets one extra step, <code>smear</code>: pixels are pushed a few pixels along a slow random field, then blurred vertically, like wet oil paint dragged downward.</p>
+    </div>
+    <figure class="panel diagram">
+      <svg viewBox="0 0 400 300" role="img" aria-label="Screen blend curve: output brightness against input brightness, without glow and with glow" style="min-width:0">
+        <g font-family="IBM Plex Sans, sans-serif" font-size="12" fill="currentColor">
+          <line x1="50" y1="250" x2="370" y2="250" stroke="currentColor" stroke-opacity="0.4"/>
+          <line x1="50" y1="250" x2="50" y2="30" stroke="currentColor" stroke-opacity="0.4"/>
+          <text x="210" y="285" text-anchor="middle" opacity="0.75">input brightness a</text>
+          <text x="20" y="140" text-anchor="middle" opacity="0.75" transform="rotate(-90 20 140)">output I</text>
+          <text x="50" y="268" text-anchor="middle" opacity="0.6">0</text><text x="370" y="268" text-anchor="middle" opacity="0.6">1</text>
+          <text x="40" y="254" text-anchor="end" opacity="0.6">0</text><text x="40" y="34" text-anchor="end" opacity="0.6">1</text>
+          <line x1="50" y1="250" x2="370" y2="30" stroke="currentColor" stroke-dasharray="4 4" stroke-opacity="0.6"/>
+          <path id="glow-curve" d="" fill="none" stroke="#e3b04b" stroke-width="2.5"/>
+          <text x="255" y="148" opacity="0.7">no glow</text>
+          <text x="62" y="70" fill="#e3b04b">with glow, g = 0.4</text>
+        </g>
+      </svg>
+      <figcaption>Assuming the blurred copy is about as bright as the pixel itself (b ≈ a): every tone gets lifted, and the brightest parts reach white first.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="attractor">
+  <div class="col">
+    <span class="eyebrow">7 · Chaos and form</span>
+    <h2>A dot that jumps a million times</h2>
+    <p>The second file in the project, <code>kaos_ve_form.wl</code> ("chaos and form"), is a gallery of shapes that come straight out of equations. The star of it is the <strong>Clifford attractor</strong>. Start a dot at (0.1, 0.1) and move it with this rule, over and over:</p>
+    <div class="formula">x<sub>new</sub> = sin(<b>a</b>·y) + <b>c</b>·cos(<b>a</b>·x)
+y<sub>new</sub> = sin(<b>b</b>·x) + <b>d</b>·cos(<b>b</b>·y)</div>
+    <p>The dot never settles and never repeats, but it also never leaves a certain region. It keeps returning to the same invisible shape. The program counts how many times the dot lands in each pixel. Busy pixels get bright colours, rarely visited ones stay dark. A logarithm keeps the busiest spots from drowning out the faint threads. Four numbers, <strong>a, b, c, d</strong>, decide the whole shape.</p>
+  </div>
+  <div class="split wide-left">
+    <figure class="panel">
+      <canvas id="cl" width="640" height="640" aria-label="Live Clifford attractor rendered from the four parameters"></canvas>
+      <div class="readout" id="cl-read"></div>
+    </figure>
+    <div class="panel" style="align-content:start">
+      <div class="controls">
+        <div class="ctl"><label for="cl-a">a</label><input id="cl-a" type="range" min="-2.5" max="2.5" step="0.01" value="-1.4"><output id="cl-a-out" for="cl-a"></output></div>
+        <div class="ctl"><label for="cl-b">b</label><input id="cl-b" type="range" min="-2.5" max="2.5" step="0.01" value="1.6"><output id="cl-b-out" for="cl-b"></output></div>
+        <div class="ctl"><label for="cl-c">c</label><input id="cl-c" type="range" min="-2.5" max="2.5" step="0.01" value="1.0"><output id="cl-c-out" for="cl-c"></output></div>
+        <div class="ctl"><label for="cl-d">d</label><input id="cl-d" type="range" min="-2.5" max="2.5" step="0.01" value="0.7"><output id="cl-d-out" for="cl-d"></output></div>
+        <div class="btns" id="cl-presets">
+          <button type="button" data-p="-1.4,1.6,1.0,0.7,fire" aria-pressed="true">art1 · Fire</button>
+          <button type="button" data-p="1.7,1.7,0.6,1.2,ocean">art2 · Ocean</button>
+          <button type="button" data-p="-1.7,1.3,-0.1,-1.2,aurora">art3 · Aurora</button>
+          <button type="button" id="cl-rand">Random</button>
+        </div>
+      </div>
+      <p class="muted" style="font-size:0.92rem">This runs right in your browser with 400,000 jumps (the real images use 3 million). Drag a slider and the shape morphs. Some settings collapse to a few dots: try setting <strong>a</strong> to 0. The Random button skips those, just like the studio in the code does.</p>
+    </div>
+  </div>
+  <div class="grid3">
+    <div class="tile"><img src="gallery/clifford_fire.jpg" alt="Clifford attractor art1 in fire colours" width="600" height="600" loading="lazy"><p><strong>art1</strong> · a = −1.4, b = 1.6, c = 1.0, d = 0.7 · Fire</p></div>
+    <div class="tile"><img src="gallery/clifford_ocean.jpg" alt="Clifford attractor art2 in ocean colours" width="600" height="600" loading="lazy"><p><strong>art2</strong> · a = 1.7, b = 1.7, c = 0.6, d = 1.2 · Ocean</p></div>
+    <div class="tile"><img src="gallery/clifford_aurora.jpg" alt="Clifford attractor art3 in aurora colours" width="600" height="600" loading="lazy"><p><strong>art3</strong> · a = −1.7, b = 1.3, c = −0.1, d = −1.2 · Aurora</p></div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section id="morph">
+  <div class="col">
+    <span class="eyebrow">8 · A bug, explained</span>
+    <h2>Why the morphing animation went dark</h2>
+    <p>One animation morphs art1 into art2 and back. The first version simply slid the four numbers from art1's values to art2's. About 24 of the 60 frames came out black.</p>
+    <p>The reason is a hidden rule. Flipping the signs of some parameters gives the <em>same</em> shape (just mirrored), and none of those flips changes the sign of <strong>a × b</strong>. In art1, a × b is negative. In art2 it's positive. So any path between them has to cross a line where <strong>a = 0</strong> or <strong>b = 0</strong>. On that line one of the equations stops depending on the dot's position, and the whole attractor collapses to a handful of points.</p>
+  </div>
+  <div class="split wide-left">
+    <figure class="panel diagram">
+      <svg viewBox="0 0 480 400" role="img" aria-label="The a-b plane: art1 sits where a times b is negative, art2 where it is positive; the straight path between them crosses the a equals zero line, where the attractor collapses" style="min-width:0">
+        <defs>
+          <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e3b04b"/></marker>
+        </defs>
+        <g font-family="IBM Plex Sans, sans-serif" fill="currentColor">
+          <!-- plane: a from -2.5..2.5 -> x 40..440 ; b from -2.5..2.5 -> y 360..40 ; scale 80 -->
+          <rect x="40" y="40" width="200" height="160" fill="#ff6b5e" fill-opacity="0.08"/>
+          <rect x="240" y="200" width="200" height="160" fill="#ff6b5e" fill-opacity="0.08"/>
+          <rect x="240" y="40" width="200" height="160" fill="#5aa2ff" fill-opacity="0.08"/>
+          <rect x="40" y="200" width="200" height="160" fill="#5aa2ff" fill-opacity="0.08"/>
+          <rect x="40" y="40" width="400" height="320" fill="none" stroke="currentColor" stroke-opacity="0.3"/>
+          <line x1="240" y1="40" x2="240" y2="360" stroke="#ff6b5e" stroke-width="3" stroke-opacity="0.85"/>
+          <line x1="40" y1="200" x2="440" y2="200" stroke="#ff6b5e" stroke-width="3" stroke-opacity="0.85"/>
+          <text x="248" y="56" font-size="12" fill="#ff6b5e">a = 0: collapse</text>
+          <text x="436" y="192" font-size="12" fill="#ff6b5e" text-anchor="end">b = 0: collapse</text>
+          <text x="140" y="80" font-size="13" text-anchor="middle" opacity="0.75">a·b &lt; 0</text>
+          <text x="340" y="80" font-size="13" text-anchor="middle" opacity="0.75">a·b &gt; 0</text>
+          <text x="140" y="340" font-size="13" text-anchor="middle" opacity="0.75">a·b &gt; 0</text>
+          <text x="340" y="340" font-size="13" text-anchor="middle" opacity="0.75">a·b &lt; 0</text>
+          <!-- art1 (-1.4,1.6) -> x=128,y=72 ; art2 (1.7,1.7) -> x=376,y=64 -->
+          <line x1="128" y1="72" x2="370" y2="64.2" stroke="#e3b04b" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arr2)"/>
+          <circle cx="128" cy="72" r="7" fill="#e3b04b"/>
+          <circle cx="376" cy="64" r="7" fill="#e3b04b"/>
+          <circle cx="240" cy="68.4" r="9" fill="none" stroke="#ff6b5e" stroke-width="2"/>
+          <text x="128" y="100" font-size="13" text-anchor="middle" font-weight="600">art1</text>
+          <text x="128" y="116" font-size="11" text-anchor="middle" opacity="0.7">(−1.4, 1.6)</text>
+          <text x="376" y="96" font-size="13" text-anchor="middle" font-weight="600">art2</text>
+          <text x="376" y="112" font-size="11" text-anchor="middle" opacity="0.7">(1.7, 1.7)</text>
+          <text x="240" y="140" font-size="12" text-anchor="middle" fill="#e3b04b">straight path in a, b</text>
+          <text x="240" y="155" font-size="12" text-anchor="middle" fill="#e3b04b">must cross a = 0</text>
+          <text x="240" y="385" font-size="12" text-anchor="middle" opacity="0.7">a →</text>
+          <text x="22" y="204" font-size="12" text-anchor="middle" opacity="0.7">b</text>
+        </g>
+      </svg>
+      <figcaption>The a–b plane (c and d left out). art1 and art2 sit on opposite sides of the a = 0 line, so sliding the numbers always passes through the collapse.</figcaption>
+    </figure>
+    <div class="col" style="width:100%">
+      <h3>The fix: morph the dots, not the numbers</h3>
+      <ol class="steps">
+        <li>Compute both attractors once: 800,000 dots each.</li>
+        <li>Scale each cloud to the same square, from −1 to 1.</li>
+        <li>Sort each cloud by distance from its centre, so dot #1 is the innermost and the last dot is the outermost.</li>
+        <li>Pair dot #k of art1 with dot #k of art2. Each frame draws every dot part of the way between its two partners.</li>
+      </ol>
+      <p class="muted">Inner dots flow to inner dots, outer to outer. No frame collapses, frame 0 is exactly art1 and the middle frame is exactly art2. In the code this is <code>cliffordBulut</code> (the sorted cloud) and <code>yogunlukResmi</code> (the density picture).</p>
+      <figure>
+        <img src="gallery/clifford_morph.gif" alt="Animated morph from art1 to art2 and back, every frame bright" width="300" height="300" loading="lazy" style="width:min(300px,100%); border-radius:8px">
+        <figcaption>The fixed animation: every frame keeps its shape.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section id="more-forms">
+  <div class="col">
+    <span class="eyebrow">9 · More shapes from equations</span>
+    <h2>The complex plane and the gyroid</h2>
+  </div>
+  <div class="split">
+    <div class="tile">
+      <div class="split" style="gap:10px">
+        <img src="gallery/complex_plane.jpg" alt="Domain colouring of a complex function: rainbow hues with rings around zeros" width="600" height="600" loading="lazy" style="border-radius:6px">
+        <img src="gallery/complex_rotation.gif" alt="Animated: the same complex function slowly rotating" width="300" height="300" loading="lazy" style="border-radius:6px">
+      </div>
+      <h3>Colouring a complex function</h3>
+      <p>Every point of the picture is a complex number z. The program computes f(z) = (z⁵ − 1)/(z² + 0.3i) + sin(1/z) and paints the <em>direction</em> of the answer as a hue (red, yellow, green …) and its <em>size</em> as rings of brightness. The rainbow pinwheels are where f(z) = 0. The busy knot in the middle comes from sin(1/z), which wiggles infinitely fast near zero. The animation replaces z with z·e<sup>it</sup>, which turns the input slowly.</p>
+    </div>
+    <div class="tile">
+      <div class="split" style="gap:10px">
+        <img src="gallery/gyroid.jpg" alt="A red gyroid surface cut into a ball, full of tunnels" width="600" height="600" loading="lazy" style="border-radius:6px">
+        <img src="gallery/gyroid_breathing.gif" alt="Animated: the gyroid ball breathing in and out" width="300" height="300" loading="lazy" style="border-radius:6px">
+      </div>
+      <h3>The gyroid</h3>
+      <p>All the points in space where sin x cos y + sin y cos z + sin z cos x = 0 form one endless surface that never crosses itself. It splits space into two interlocking tunnel systems. Nature uses the same shape in the nanostructures that colour some butterfly wings. Here it is cut down to a ball. In the "breathing" animation the 0 on the right-hand side moves up and down, so the tunnels widen and narrow.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section id="run">
+  <div class="col">
+    <span class="eyebrow">10 · Run it yourself</span>
+    <h2>Two ways to make your own</h2>
+    <h3>With Python (no Mathematica needed)</h3>
+<pre>git clone https://github.com/beriltatli/mathematica-sanat
+cd mathematica-sanat
+python3 -m venv .venv
+.venv/bin/pip install -r python/requirements.txt
+.venv/bin/python python/studyo.py        # sliders for the three painting modes
+.venv/bin/python python/studyo_kaos.py   # sliders for the Clifford attractor</pre>
+    <p class="muted">The studio windows have the same controls as the Mathematica version: mode, seed, palette, vortex strength, density and the golden guide. "Save" writes a 3000 px PNG, enough for a print of about 25 × 40 cm at 300 dpi.</p>
+    <h3>With Mathematica or the free Wolfram Engine</h3>
+    <p class="muted">Open <code>ruh_katmanlari.wl</code> in Mathematica and choose Run All Code. Or install the free <a href="https://www.wolfram.com/engine/">Wolfram Engine</a> and run <code>wolframscript -file calistir.wls</code> to write example PNGs into <code>ciktilar/</code>. The Mathematica code passes a syntax check but hasn't been run in Mathematica yet. Every image on this page comes from the Python port.</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="wrap">
+  <div class="col">
+    <p>Code and full documentation: <a href="https://github.com/beriltatli/mathematica-sanat">github.com/beriltatli/mathematica-sanat</a>. Inspired by the general look of expressionist acrylic painting: visible flowing brushwork, translucent layers, neon colour and bursts of light. No existing artwork was copied. Every composition is generated from its seed.</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const PHI = (1 + Math.sqrt(5)) / 2;
+  const GA = Math.PI * (3 - Math.sqrt(5));
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const blend = (cols, t) => {
+    t = Math.min(1, Math.max(0, t));
+    const u = t * (cols.length - 1), i = Math.min(cols.length - 2, Math.floor(u)), f = u - i;
+    return cols[i].map((v, k) => v + (cols[i + 1][k] - v) * f);
+  };
+  const KOZMIK = ["#0b1150", "#2337c6", "#5aa2ff", "#8a2be2", "#e5207f", "#ff6a3d", "#ffd84a"].map(hex);
+
+  /* ---------- golden construction (port of goldenConstruction) ---------- */
+  function golden(n) {
+    let x = 0, y = 0, w = 1, h = PHI;
+    const sq = [], arcs = [];
+    for (let k = 0; k < n; k++) {
+      const m = k % 4; let s;
+      if (m === 0) { s = w; sq.push([x, y + h - s, s]); arcs.push([x, y + h - s, s, 90]); h -= s; }
+      else if (m === 1) { s = h; sq.push([x + w - s, y, s]); arcs.push([x + w - s, y + h, s, 0]); w -= s; }
+      else if (m === 2) { s = w; sq.push([x, y, s]); arcs.push([x + s, y + s, s, -90]); y += s; h -= s; }
+      else { s = h; sq.push([x, y, s]); arcs.push([x + s, y, s, 180]); x += s; w -= s; }
+    }
+    const spiral = [];
+    for (const [cx, cy, r, a0] of arcs)
+      for (let i = 0; i < 40; i++) {
+        const t = (a0 - 90 * i / 39) * Math.PI / 180;
+        spiral.push([cx + r * Math.cos(t), cy + r * Math.sin(t)]);
+      }
+    return { sq, spiral, pole: [x + w / 2, y + h / 2] };
+  }
+  const POLE = golden(30).pole;
+
+  /* ---------- 2. golden rectangle ---------- */
+  {
+    const svg = document.getElementById("gr-svg"), k = document.getElementById("gr-k"),
+      out = document.getElementById("gr-k-out"), mir = document.getElementById("gr-mirror");
+    const S = 300, OX = 15, OY = 15;
+    const names = ["top", "right", "bottom", "left"];
+    function draw() {
+      const n = +k.value, flip = mir.getAttribute("aria-pressed") === "true";
+      out.textContent = n;
+      const g = golden(n);
+      const T = ([x, y]) => { if (flip) y = PHI - y; return [OX + x * S, OY + (PHI - y) * S]; };
+      let s = `<rect x="${OX}" y="${OY}" width="${S}" height="${PHI * S}" fill="none" stroke="currentColor" stroke-opacity="0.5"/>`;
+      g.sq.forEach(([x, y, e], i) => {
+        const [x1, y1] = T([x, y]), [x2, y2] = T([x + e, y + e]);
+        const X = Math.min(x1, x2), Y = Math.min(y1, y2), W = Math.abs(x2 - x1);
+        const last = i === g.sq.length - 1;
+        s += `<rect x="${X}" y="${Y}" width="${W}" height="${W}" fill="#e3b04b" fill-opacity="${last ? 0.18 : 0.04}" stroke="currentColor" stroke-opacity="0.35"/>`;
+        if (W > 46) {
+          const lab = i === 0 ? "1" : (1 / PHI ** i).toFixed(3);
+          s += `<text x="${X + W / 2}" y="${Y + W / 2 + 6}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="${Math.min(22, W * 0.16)}" fill="#e3b04b">${lab}</text>`;
+          if (W > 80) s += `<text x="${X + 6}" y="${Y + 16}" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="currentColor" opacity="0.6">${i + 1}. ${names[i % 4]}</text>`;
+        }
+      });
+      if (g.spiral.length) s += `<polyline points="${g.spiral.map(T).map(p => p.join(",")).join(" ")}" fill="none" stroke="#e3b04b" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+      const [px, py] = T(POLE);
+      s += `<circle cx="${px}" cy="${py}" r="6" fill="#ff6b5e" stroke="#0e1018" stroke-width="2"/>`;
+      if (flip) s += `<line x1="${OX}" x2="${OX + S}" y1="${py}" y2="${py}" stroke="#ff6b5e" stroke-dasharray="4 4"/><text x="${OX + S - 4}" y="${py - 6}" text-anchor="end" font-family="IBM Plex Sans, sans-serif" font-size="12" fill="#ff6b5e">72.4% of height</text>`;
+      svg.innerHTML = s;
+    }
+    k.addEventListener("input", draw);
+    mir.addEventListener("click", () => { mir.setAttribute("aria-pressed", mir.getAttribute("aria-pressed") === "true" ? "false" : "true"); draw(); });
+    draw();
+  }
+
+  /* ---------- 3. sunflower ---------- */
+  {
+    const cv = document.getElementById("sf"), ctx = cv.getContext("2d"),
+      sl = document.getElementById("sf-a"), out = document.getElementById("sf-a-out"),
+      pres = [...document.querySelectorAll("#sf-presets button")];
+    function draw() {
+      const a = +sl.value * Math.PI / 180, N = 520, R = 290;
+      out.textContent = (+sl.value).toFixed(1) + "°";
+      pres.forEach(b => b.setAttribute("aria-pressed", Math.abs(+b.dataset.a - +sl.value) < 0.05 ? "true" : "false"));
+      ctx.fillStyle = "#0e1018"; ctx.fillRect(0, 0, 640, 640);
+      for (let i = 0; i < N; i++) {
+        const r = R * Math.sqrt(i / N), th = i * a;
+        const c = blend(KOZMIK, 0.95 - 0.6 * i / N);
+        ctx.fillStyle = `rgb(${c.map(Math.round).join(",")})`;
+        ctx.beginPath(); ctx.arc(320 + r * Math.cos(th), 320 - r * Math.sin(th), 2.2 + 4.5 * (1 - i / N), 0, 2 * Math.PI); ctx.fill();
+      }
+    }
+    sl.addEventListener("input", draw);
+    pres.forEach(b => b.addEventListener("click", () => { sl.value = b.dataset.a; draw(); }));
+    draw();
+  }
+
+  /* ---------- 4. flow field ---------- */
+  {
+    const cv = document.getElementById("ff"), ctx = cv.getContext("2d"),
+      sl = document.getElementById("ff-s"), out = document.getElementById("ff-s-out"),
+      seedBtn = document.getElementById("ff-seed"), arrBtn = document.getElementById("ff-arrows"),
+      guideBtn = document.getElementById("ff-guide"), read = document.getElementById("ff-read");
+    const W = 600, SC = W; // 1 canvas unit = 600 px; height = φ units
+    const sp = golden(14).spiral;
+    // three vortices: pole + two points on the spiral (approximate positions of sp[[61]], sp[[201]])
+    const V = [{ p: POLE, s: 1, d: 1 }, { p: sp[Math.floor(sp.length * 0.11)], s: 1 / PHI, d: -1 }, { p: sp[Math.floor(sp.length * 0.36)], s: 1 / PHI ** 2, d: 1 }];
+    let seed = 23, job = 0;
+    function rng(s) { return () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+    function field(x, y, P, S) {
+      const xt = x + 0.22 * Math.sin(3.3 * y + P[0]), yt = y + 0.22 * Math.sin(2.9 * x + P[1]);
+      const n = Math.sin(4.1 * xt + P[2]) + Math.cos(3.4 * yt - P[0]) + 0.6 * Math.sin(8.5 * (xt - 0.7 * yt) + P[1]);
+      let vx = Math.cos(1.4 * n), vy = Math.sin(1.4 * n);
+      for (const v of V) {
+        const dx = x - v.p[0], dy = y - v.p[1], r = Math.hypot(dx, dy) + 0.001;
+        const g = 2.2 * S * v.s * Math.exp(-r / (0.5 * Math.sqrt(v.s)));
+        const al = Math.atan2(dy, dx) + v.d * (Math.PI / 2 + 0.3);
+        vx += g * Math.cos(al); vy += g * Math.sin(al);
+      }
+      const m = Math.hypot(vx, vy) || 1;
+      return [vx / m, vy / m, n];
+    }
+    const toPx = (x, y) => [x * SC, (PHI - y) * SC];
+    function overlay(P, S) {
+      if (guideBtn.getAttribute("aria-pressed") === "true") {
+        ctx.strokeStyle = "rgba(227,176,75,0.75)"; ctx.lineWidth = 1.6; ctx.beginPath();
+        sp.forEach((p, i) => { const [a, b] = toPx(...p); i ? ctx.lineTo(a, b) : ctx.moveTo(a, b); }); ctx.stroke();
+        V.forEach((v, i) => { const [a, b] = toPx(...v.p); ctx.fillStyle = i ? "rgba(255,255,255,0.85)" : "#ff6b5e"; ctx.beginPath(); ctx.arc(a, b, i ? 4 : 6, 0, 7); ctx.fill(); });
+      }
+      if (arrBtn.getAttribute("aria-pressed") === "true") {
+        ctx.strokeStyle = "rgba(255,255,255,0.8)"; ctx.lineWidth = 1.2;
+        for (let gx = 0.04; gx < 1; gx += 0.06) for (let gy = 0.04; gy < PHI; gy += 0.06) {
+          const [vx, vy] = field(gx, gy, P, S), [a, b] = toPx(gx, gy), L = 13;
+          const ex = a + vx * L, ey = b - vy * L;
+          ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(ex, ey); ctx.stroke();
+          const ang = Math.atan2(-vy, vx);
+          ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex - 4 * Math.cos(ang - 0.5), ey - 4 * Math.sin(ang - 0.5)); ctx.lineTo(ex - 4 * Math.cos(ang + 0.5), ey - 4 * Math.sin(ang + 0.5)); ctx.closePath(); ctx.fillStyle = "rgba(255,255,255,0.8)"; ctx.fill();
+        }
+      }
+    }
+    let lastP = null, lastS = 1, base = null;
+    function draw() {
+      const my = ++job, S = +sl.value, R = rng(seed);
+      out.textContent = S.toFixed(1);
+      const P = [R() * 6.283, R() * 6.283, R() * 6.283];
+      lastP = P; lastS = S;
+      read.innerHTML = `seed <b>${seed}</b> · phases p₁ p₂ p₃ = <b>${P.map(p => p.toFixed(2)).join(" ")}</b>`;
+      ctx.fillStyle = "#0b1150"; ctx.fillRect(0, 0, W, cv.height);
+      const strokes = [];
+      for (let i = 0; i < 2600; i++) strokes.push([R(), R() * PHI, R()]);
+      let idx = 0;
+      const batch = reduce ? strokes.length : 130;
+      function step() {
+        if (my !== job) return;
+        const end = Math.min(strokes.length, idx + batch);
+        for (; idx < end; idx++) {
+          let [x, y, t] = strokes[idx];
+          const wide = idx < 900;
+          const steps = wide ? 34 : 22, dt = wide ? 0.007 : 0.005;
+          const first = field(x, y, P, S);
+          const c = blend(KOZMIK, 0.08 + 0.84 * ((first[2] + 2.6) / 5.2) * 0.6 + 0.4 * t * (idx / strokes.length));
+          ctx.strokeStyle = `rgba(${c.map(Math.round).join(",")},${wide ? 0.22 : 0.55})`;
+          ctx.lineWidth = wide ? 7 : 1.6; ctx.lineCap = "round"; ctx.lineJoin = "round";
+          ctx.beginPath(); ctx.moveTo(...toPx(x, y));
+          for (let k = 0; k < steps; k++) { const [vx, vy] = field(x, y, P, S); x += dt * vx; y += dt * vy; ctx.lineTo(...toPx(x, y)); }
+          ctx.stroke();
+        }
+        if (idx < strokes.length) requestAnimationFrame(step);
+        else { base = ctx.getImageData(0, 0, W, cv.height); overlay(P, S); }
+      }
+      base = null; step();
+    }
+    function redrawOverlay() { if (base) { ctx.putImageData(base, 0, 0); overlay(lastP, lastS); } }
+    sl.addEventListener("change", draw);
+    sl.addEventListener("input", () => out.textContent = (+sl.value).toFixed(1));
+    seedBtn.addEventListener("click", () => { seed = 1 + Math.floor(Math.random() * 500); draw(); });
+    [arrBtn, guideBtn].forEach(b => b.addEventListener("click", () => { b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true"); redrawOverlay(); }));
+    draw();
+  }
+
+  /* ---------- 6. glow curve ---------- */
+  {
+    const pts = [];
+    for (let i = 0; i <= 50; i++) { const a = i / 50, I = 1 - (1 - a) * (1 - 0.4 * a); pts.push(`${50 + a * 320},${250 - I * 220}`); }
+    document.getElementById("glow-curve").setAttribute("d", "M" + pts.join(" L"));
+  }
+
+  /* ---------- 7. Clifford attractor ---------- */
+  {
+    const cv = document.getElementById("cl"), ctx = cv.getContext("2d"), read = document.getElementById("cl-read");
+    const ids = ["a", "b", "c", "d"], sl = ids.map(i => document.getElementById("cl-" + i)), outs = ids.map(i => document.getElementById("cl-" + i + "-out"));
+    const pres = [...document.querySelectorAll("#cl-presets button[data-p]")];
+    const GRADS = {
+      fire: [[0, 0, 0], [89, 0, 64], [230, 64, 26], [255, 204, 77], [255, 255, 255]],
+      ocean: [[0, 0, 0], [0, 26, 77], [0, 140, 179], [153, 255, 242], [255, 255, 255]],
+      aurora: [[0, 0, 0], [26, 0, 77], [77, 51, 230], [51, 242, 153], [255, 255, 255]],
+    };
+    let grad = "fire";
+    const RES = 640, img = ctx.createImageData(RES, RES), counts = new Float32Array(RES * RES);
+    function points(a, b, c, d, n, cb) { let x = 0.1, y = 0.1; for (let i = 0; i < n; i++) { const xn = Math.sin(a * y) + c * Math.cos(a * x); y = Math.sin(b * x) + d * Math.cos(b * y); x = xn; cb(x, y); } }
+    function live(a, b, c, d) {
+      const seen = new Set(); let i = 0;
+      points(a, b, c, d, 21000, (x, y) => { if (i++ >= 1000) seen.add(Math.floor((x / (1 + Math.abs(c)) + 1) * 50) * 1000 + Math.floor((y / (1 + Math.abs(d)) + 1) * 50)); });
+      return seen.size;
+    }
+    function render(n) {
+      const [a, b, c, d] = sl.map(s => +s.value);
+      sl.forEach((s, i) => outs[i].textContent = (+s.value).toFixed(2));
+      counts.fill(0);
+      const xr = 1 + Math.abs(c), yr = 1 + Math.abs(d);
+      points(a, b, c, d, n, (x, y) => {
+        const px = Math.floor((x + xr) / (2 * xr) * RES), py = Math.floor((yr - y) / (2 * yr) * RES);
+        if (px >= 0 && px < RES && py >= 0 && py < RES) counts[py * RES + px]++;
+      });
+      let mx = 0; for (let i = 0; i < counts.length; i++) if (counts[i] > mx) mx = counts[i];
+      const lm = Math.log(1 + mx) || 1, G = GRADS[grad];
+      for (let i = 0; i < counts.length; i++) {
+        const v = counts[i] ? Math.pow(Math.log(1 + counts[i]) / lm, 0.55) : 0;
+        const col = blend(G, v);
+        img.data[4 * i] = col[0]; img.data[4 * i + 1] = col[1]; img.data[4 * i + 2] = col[2]; img.data[4 * i + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+      const cells = live(a, b, c, d), ok = cells > 300;
+      read.innerHTML = `${n.toLocaleString("en-US")} jumps · a·b = <b>${(a * b).toFixed(2)}</b> · cells visited on a 100×100 grid: <b class="${ok ? "" : "bad"}">${cells}</b>${ok ? "" : ' <span class="bad">· collapsed</span>'}`;
+    }
+    let raf = 0;
+    const quick = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => render(120000)); };
+    const full = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => render(400000)); };
+    sl.forEach(s => { s.addEventListener("input", () => { pres.forEach(b => b.setAttribute("aria-pressed", "false")); quick(); }); s.addEventListener("change", full); });
+    pres.forEach(b => b.addEventListener("click", () => {
+      const p = b.dataset.p.split(","); sl.forEach((s, i) => s.value = p[i]); grad = p[4];
+      pres.forEach(o => o.setAttribute("aria-pressed", o === b ? "true" : "false")); full();
+    }));
+    document.getElementById("cl-rand").addEventListener("click", () => {
+      let p;
+      for (let k = 0; k < 50; k++) { p = [0, 0, 0, 0].map(() => Math.random() * 5 - 2.5); if (live(...p) > 300) break; }
+      sl.forEach((s, i) => s.value = p[i].toFixed(2));
+      pres.forEach(o => o.setAttribute("aria-pressed", "false")); full();
+    });
+    render(400000);
+  }
+})();
+</script>
+</body>
+</html>

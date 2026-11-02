@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="760" height="475" viewBox="0 0 760 475" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
-<title>Fillotaksis: altın açıyla dizilmiş noktalar</title>
+<title>Phyllotaxis: dots placed by the golden angle</title>
 <rect x="0.5" y="0.5" width="759" height="474" rx="14" fill="#0f1220" stroke="#2a2f45"/>
-<text x="30.0" y="40.0" font-size="20" fill="#e8e6f0" text-anchor="start" font-weight="600">Fillotaksis: ayçiçeği gibi dizilim</text>
-<text x="30.0" y="63.0" font-size="13" fill="#9aa0b8" text-anchor="start">rₙ = R·√(n/N),  θₙ = n·θg   (N = 400; ruhKatmanlari'ndaki phyllo katmanı 520 ve 300 nokta)</text>
+<text x="30.0" y="40.0" font-size="20" fill="#e8e6f0" text-anchor="start" font-weight="600">Phyllotaxis: the sunflower pattern</text>
+<text x="30.0" y="63.0" font-size="13" fill="#9aa0b8" text-anchor="start">rₙ = R·√(n/N),  θₙ = n·θg   (N = 400 here; the phyllo layer in ruhKatmanlari uses 520 and 300)</text>
 <circle cx="215.00" cy="255.00" r="3.89" fill="#ffb746" fill-opacity="0.9"/>
 <circle cx="208.92" cy="249.43" r="3.89" fill="#ffb646" fill-opacity="0.9"/>
 <circle cx="216.02" cy="266.62" r="3.88" fill="#ffb546" fill-opacity="0.9"/>
@@ -411,8 +411,8 @@
 <text x="541.1" y="278.7" font-size="13" fill="#9aa0b8" text-anchor="middle">360°/φ</text>
 <text x="455.0" y="345.0" font-size="13.5" fill="#e3b04b" text-anchor="start" font-weight="600">θg = 360°/φ² ≈ 137.51°</text>
 <text x="455.0" y="364.0" font-size="13.5" fill="#e8e6f0" text-anchor="start">360° − θg = 360°/φ ≈ 222.49°</text>
-<text x="455.0" y="383.0" font-size="13.5" fill="#e8e6f0" text-anchor="start">büyük yay / küçük yay = φ ≈ 1.618</text>
-<text x="455.0" y="402.0" font-size="12.5" fill="#9aa0b8" text-anchor="start">Her yeni nokta bir öncekinden θg kadar döner:</text>
-<text x="455.0" y="421.0" font-size="12.5" fill="#9aa0b8" text-anchor="start">açı hiçbir kesirle tekrarlanmadığı için</text>
-<text x="455.0" y="440.0" font-size="12.5" fill="#9aa0b8" text-anchor="start">noktalar boşluk bırakmadan yayılır.</text>
+<text x="455.0" y="383.0" font-size="13.5" fill="#e8e6f0" text-anchor="start">large arc / small arc = φ ≈ 1.618</text>
+<text x="455.0" y="402.0" font-size="12.5" fill="#9aa0b8" text-anchor="start">Each new dot turns θg past the previous one.</text>
+<text x="455.0" y="421.0" font-size="12.5" fill="#9aa0b8" text-anchor="start">The angle never lines up with a simple fraction,</text>
+<text x="455.0" y="440.0" font-size="12.5" fill="#9aa0b8" text-anchor="start">so the dots spread out with no gaps.</text>
 </svg>
