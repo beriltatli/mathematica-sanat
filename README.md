@@ -260,6 +260,25 @@ Sonra VS Code'da bir `.ipynb` dosyası açıp "Wolfram Language" çekirdeğini s
 
 **Sürüm notu:** `ruh_katmanlari.wl` Mathematica 12 uyumlu yazıldı. `kaos_ve_form.wl` `ComplexPlot` için Mathematica 12, MP4 dışa aktarma için 12.1 ister. Wolfram Engine her zaman güncel sürümdür.
 
+### Mathematica olmadan: Python sürümü
+
+`python/` klasörü iki `.wl` dosyasının Python karşılığıdır; Wolfram çekirdeği gerekmez. Fonksiyon adları ve bölüm numaraları `.wl` dosyalarıyla aynıdır (`ruhKatmanlari` → `ruh_katmanlari`, `traceStrokes` → `trace_strokes` …).
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r python/requirements.txt
+.venv/bin/python python/calistir.py         # calistir.wls karşılığı → ciktilar/
+.venv/bin/python python/calistir_kaos.py    # calistir_kaos.wls karşılığı → ciktilar/kaos/
+```
+
+| Dosya | Karşılığı | Not |
+|---|---|---|
+| `python/tuval.py` | `Graphics` + `Rasterize` | İlkeller sırayla kaydedilir, matplotlib (Agg) ile rasterleştirilir; kalınlıklar tuval genişliğine oranlı |
+| `python/ruh_katmanlari.py` | `ruh_katmanlari.wl` | Üç mod, `finish`, `smear`; `traceStrokes` numpy ile bütün darbeleri aynı anda izler |
+| `python/kaos_ve_form.py` | `kaos_ve_form.wl` | Clifford yinelemesi numba ile derlenir; gyroid pyvista (VTK) ile çizilir |
+
+Farklar: rastgele sayı üreteci farklı olduğu için aynı tohum Mathematica'daki resmin aynısını vermez (kurallar aynıdır). `ComplexPlot`'un `"CyclicLogAbsArg"` renklendirmesi ve `"SunsetColors"` yaklaşık olarak yeniden kuruldu. Gyroid tek ana ışıkla aydınlatılır. `Manipulate` stüdyoları henüz taşınmadı.
+
 ## Dosya yapısı
 
 | Dosya | Açıklama |
@@ -272,7 +291,9 @@ Sonra VS Code'da bir `.ipynb` dosyası açıp "Wolfram Language" çekirdeğini s
 | `docs/*.svg` | README diyagramları: altın spiral, fillotaksis, paletler |
 | `docs/araclar/diyagramlar.py` | SVG'leri yeniden üreten Python betiği (`python3 docs/araclar/diyagramlar.py`, yalnızca standart kütüphane) |
 | `docs/notlar/` | Geliştirme notları ve talimatlar |
-| `ciktilar/` | `calistir.wls` çıktıları; git'e girmez |
+| `calistir_kaos.wls` | `wolframscript` ile `kaos_ve_form.wl` görsellerini ve animasyon GIF'lerini `ciktilar/kaos/` klasörüne yazar |
+| `python/` | Mathematica gerektirmeyen Python sürümü (yukarıya bak) |
+| `ciktilar/` | `calistir.wls` / `python/calistir*.py` çıktıları; git'e girmez |
 
 ## İlham ve özgünlük
 
